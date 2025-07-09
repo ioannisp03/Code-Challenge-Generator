@@ -1,1 +1,1 @@
-# Code_Challenge_Generator
+# Code-Challenge-Generator
