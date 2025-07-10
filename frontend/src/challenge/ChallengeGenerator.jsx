@@ -1,3 +1,3 @@
-export default function ChallengeGenerator(){
-    return <></>
+export function ChallengeGenerator(){
+    return <>challenge generator</>
 }
