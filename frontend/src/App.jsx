@@ -15,7 +15,7 @@ function App() {
         <Route path="/sign-up/*" element={<AuthenticationPage />} />
         <Route element={<Layout />}>
           {/* These routes will render inside the layout component */}
-          <Route path="/" element={ChallengeGenerator} />
+          <Route path="/" element={<ChallengeGenerator />} />
           <Route path="/history" element={HistoryPanel} />
         </Route>
       </Routes>
