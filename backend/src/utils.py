@@ -23,7 +23,7 @@ def authenticate_and_get_user_details(request):
         )
         if not request_state.is_authenticated:
             raise HTTPException(status_code=401, detail="Invalid token")
-        user_id = request_state.payload.get("sub") #When we decode the token, sub is where the ID is stored
+        user_id = request_state.payload.get("sub") #Standard JWT field that stores the user's ID
         
         return {"user_id": user_id}
         

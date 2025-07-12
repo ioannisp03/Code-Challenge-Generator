@@ -1,0 +1,52 @@
+from sqlalchemy.orm import Session
+from datetime import datetime, timedelta
+from . import models  # src/database/models.py
+
+
+def get_challenge_quota(db: Session, user_id: str):
+    (
+        db.query(models.ChallengeQuota)
+        .filter(models.ChallengeQuota.user_id == user_id)
+        .first()
+    )
+
+
+def create_challenge_quota(db: Session, user_id: str):
+    db_quota = models.ChallengeQuota(user_id=user_id)
+    db.add(db_quota)
+    db.commit()
+    db.refresh(db_quota)
+    return db_quota
+
+
+def reset_quota_if_needed(db: Session, quota: models.ChallengeQuota):
+    now = datetime.now()
+    if now - quota.last_reset_date > timedelta(hours=24):
+        quota.quota_remaining = 10
+        quota.last_reset_date = now
+        db.commit()
+        db.refresh()
+        return quota
+
+
+def create_challenge(
+    db: Session,
+    difficulty: str,
+    created_by: str,
+    title: str,
+    options: str,
+    correct_answer_id: int,
+    explanation: str,
+):
+    db_challenge = models.Challenge(
+        difficulty=str,
+        created_by=str,
+        title=str,
+        options=str,
+        correct_answer_id=int,
+        explanation=str,
+    )
+    db.add(db_challenge)
+    db.commit()
+    db.refresh()
+    return db_challenge
