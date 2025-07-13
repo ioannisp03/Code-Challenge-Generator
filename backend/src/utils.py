@@ -25,7 +25,7 @@ def authenticate_and_get_user_details(request):
             raise HTTPException(status_code=401, detail="Invalid token")
         user_id = request_state.payload.get("sub") #Standard JWT field that stores the user's ID
         
-        return {"user_id": user_id}
+        return {"user_id": user_id} # We can access this id via "user_id in other files instead of 'sub' "
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
