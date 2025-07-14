@@ -4,7 +4,7 @@ from . import models  # src/database/models.py
 
 
 def get_challenge_quota(db: Session, user_id: str):
-    (
+    return (
         db.query(models.ChallengeQuota)
         .filter(models.ChallengeQuota.user_id == user_id)
         .first()
@@ -25,8 +25,8 @@ def reset_quota_if_needed(db: Session, quota: models.ChallengeQuota):
         quota.quota_remaining = 10
         quota.last_reset_date = now
         db.commit()
-        db.refresh()
-        return quota
+        db.refresh(quota)
+    return quota
 
 
 def create_challenge(
@@ -39,16 +39,16 @@ def create_challenge(
     explanation: str,
 ):
     db_challenge = models.Challenge(
-        difficulty=str,
-        created_by=str,
-        title=str,
-        options=str,
-        correct_answer_id=int,
-        explanation=str,
+        difficulty=difficulty,
+        created_by=created_by,
+        title=title,
+        options=options,
+        correct_answer_id=correct_answer_id,
+        explanation=explanation,
     )
     db.add(db_challenge)
     db.commit()
-    db.refresh()
+    db.refresh(db_challenge)
     return db_challenge
 
 

@@ -4,7 +4,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
 
-engine = create_engine("sqlite://database.db", echo=True)
+engine = create_engine('sqlite:///database.db', echo=True)
 
 # When class inherits from this, it transforms it to a 'Database Aware ORM Model'
 # You are declaring database schemas inside classes
@@ -15,7 +15,7 @@ class Challenge(Base):
     __tablename__ = "challenges"
     id = Column(Integer, primary_key=True)
     difficulty = Column(String, nullable=False)  # can't be null
-    date_created = Column(DateTime, default=datetime)
+    date_created = Column(DateTime, default=datetime.now)
     created_by = Column(String, nullable=False)
     title = Column(String, nullable=False)
     options = Column(String, nullable=False)
@@ -26,7 +26,7 @@ class Challenge(Base):
 class ChallengeQuota(Base):
     __tablename__ = "challenge_quotas"
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, primary_key=True, unique=True)
+    user_id = Column(Integer, unique=True)
     quota_remaining = Column(
         Integer, nullable=False, default=50
     )  # starting value for quota

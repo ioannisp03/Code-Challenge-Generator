@@ -8,12 +8,13 @@ from ..database.db import (
     reset_quota_if_needed,
     get_user_challenges,
 )
+from ..ai_generator import generate_challenge_with_ai
 from ..utils import authenticate_and_get_user_details
 from ..database.models import get_db
 import json
 from datetime import datetime
 
-
+# Creates an API router instance
 router = APIRouter()
 
 
@@ -27,10 +28,10 @@ class ChallengeRequest(BaseModel):
 
 @router.post("/generate-challenge")
 async def generate_challenge(
-    request: ChallengeRequest, db: Session = Depends(get_db)
+    request: ChallengeRequest, request_obj: Request, db: Session = Depends(get_db)
 ):  # get db session. Depends on it
     try:
-        user_details = authenticate_and_get_user_details(request)
+        user_details = authenticate_and_get_user_details(request_obj)
         user_id = user_details.get("user_id")
 
         # getting quota object from the db
@@ -38,25 +39,46 @@ async def generate_challenge(
 
         # No quota
         if not quota:
-            create_challenge_quota(db, user_id)
+            quota = create_challenge_quota(db, user_id)
 
         quota = reset_quota_if_needed(db, quota)
+
         if quota.quota_remaining <= 0:
             raise HTTPException(
                 status_code=429, detail="Quota exhausted"
             )  # 429 is a right limit exception
 
-        challenge_data = None
+        challenge_data = generate_challenge_with_ai(request.difficulty)
+
+        new_challenge = create_challenge(
+            db=db,
+            difficulty=request.difficulty,
+            created_by=user_id,
+            title=challenge_data["title"],
+            options=json.dumps(challenge_data["options"]),
+            correct_answer_id=challenge_data["correct_answer_id"],
+            explanation=challenge_data["explanation"],
+        )
+
         # TODO: Generate challenge
         quota.quota_remaining -= 1
         db.commit()
-        return challenge_data
+        return {
+            "id": new_challenge.id,
+            "difficulty": request.difficulty,
+            "title": new_challenge.title,
+            "options": json.loads(new_challenge.options),
+            "correct_answer_id": new_challenge.correct_answer_id,
+            "explanation": new_challenge.explanation,
+            "timestamp": new_challenge.date_created.isoformat(),  # yyyy-mm-dd (and time)
+        }
+
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.get("/my-history")
-async def my_history(request, db: Session = Depends(get_db)):
+async def my_history(request:Request, db: Session = Depends(get_db)):
     user_details = authenticate_and_get_user_details(
         request
     )  # authenticates user and gets details
@@ -69,7 +91,7 @@ async def my_history(request, db: Session = Depends(get_db)):
 
 
 @router.get("/quota")
-async def get_quota(request, db: Session = Depends(get_db)):
+async def get_quota(request:Request, db: Session = Depends(get_db)):
     user_details = authenticate_and_get_user_details(
         request
     )  # authenticates user and gets details
