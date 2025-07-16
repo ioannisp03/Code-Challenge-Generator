@@ -1,4 +1,4 @@
-# Code Challenge Generator 🧩
+# Code Challenge Generator
 
 A full‑stack web app that lets instructors and learners quickly **generate coding challenges powered by AI**.
 
